@@ -9,7 +9,6 @@ const assetSaver = require('../../lib/asset-saver.js');
 const Metrics = require('../../lib/traces/pwmetrics-events.js');
 const assert = require('assert').strict;
 const fs = require('fs');
-const rimraf = require('rimraf');
 const LHError = require('../../lib/lh-error.js');
 
 const traceEvents = require('../fixtures/traces/progressive-app.json');
@@ -222,7 +221,7 @@ describe('asset-saver helper', () => {
     const outputPath = __dirname + '/json-serialization-test-data/';
 
     afterEach(() => {
-      rimraf.sync(outputPath);
+      fs.rmdirSync(outputPath, {recursive: true});
     });
 
     it('round trips saved artifacts', async () => {

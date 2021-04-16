@@ -35,7 +35,7 @@ async function runLighthouse(url, configJson, testRunnerOptions = {}) {
 
   const {isDebug} = testRunnerOptions;
   return internalRun(url, tmpPath, configJson, isDebug)
-    // Wait for internalRun() before rmdiring scratch directory.
+    // Wait for internalRun() before removing scratch directory.
     .finally(() => !isDebug && fs.rmdir(tmpPath, {recursive: true}));
 }
 

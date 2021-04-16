@@ -233,6 +233,27 @@ describe('asset-saver helper', () => {
       expect(roundTripArtifacts).toStrictEqual(originalArtifacts);
     });
 
+    it('deletes existing artifact files before saving', async () => {
+      // Write some fake artifact files to start with.
+      fs.mkdirSync(outputPath, {recursive: true});
+      fs.writeFileSync(`${outputPath}/artifacts.json`, '{"BenchmarkIndex": 1731.5}');
+      const existingTracePath = `${outputPath}/bestPass.trace.json`;
+      fs.writeFileSync(existingTracePath, '{"traceEvents": []}');
+      const existingDevtoolslogPath = `${outputPath}/bestPass.devtoolslog.json`;
+      fs.writeFileSync(existingDevtoolslogPath, '[]');
+
+      const artifactsPath = __dirname + '/../results/artifacts/';
+      const originalArtifacts = await assetSaver.loadArtifacts(artifactsPath);
+
+      await assetSaver.saveArtifacts(originalArtifacts, outputPath);
+
+      expect(fs.existsSync(existingDevtoolslogPath)).toBe(false);
+      expect(fs.existsSync(existingTracePath)).toBe(false);
+
+      const roundTripArtifacts = await assetSaver.loadArtifacts(outputPath);
+      expect(roundTripArtifacts).toStrictEqual(originalArtifacts);
+    });
+
     it('round trips artifacts with an Error member', async () => {
       const error = new Error('Connection refused by server');
       // test code to make sure e.g. Node errors get serialized well.

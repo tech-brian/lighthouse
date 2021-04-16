@@ -101,8 +101,15 @@ async function saveArtifacts(artifacts, basePath) {
   const status = {msg: 'Saving artifacts', id: 'lh:assetSaver:saveArtifacts'};
   log.time(status);
   fs.mkdirSync(basePath, {recursive: true});
-  fs.rmdirSync(`${basePath}/*${traceSuffix}`, {recursive: true});
-  fs.rmdirSync(`${basePath}/${artifactsFilename}`, {recursive: true});
+
+  // Delete any previous artifacts in this directory.
+  const filenames = fs.readdirSync(basePath);
+  for (const filename of filenames) {
+    if (filename.endsWith(traceSuffix) || filename.endsWith(devtoolsLogSuffix) ||
+        filename === artifactsFilename) {
+      fs.unlinkSync(`${basePath}/${filename}`);
+    }
+  }
 
   const {traces, devtoolsLogs, ...restArtifacts} = artifacts;
 

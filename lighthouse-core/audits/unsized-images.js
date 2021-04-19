@@ -94,9 +94,9 @@ class UnsizedImages extends Audit {
     const explicitAspectRatio = UnsizedImages.doesCssPropProvideExplicitSize(cssAspectRatio);
     const explicitWidth = htmlWidthIsExplicit || cssWidthIsExplicit;
     const explicitHeight = htmlHeightIsExplicit || cssHeightIsExplicit;
-    return explicitWidth && explicitHeight ||
-      explicitWidth && explicitAspectRatio ||
-      explicitHeight && explicitAspectRatio;
+    return (explicitWidth && explicitHeight) ||
+      (explicitWidth && explicitAspectRatio) ||
+      (explicitHeight && explicitAspectRatio);
   }
 
   /**

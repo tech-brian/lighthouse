@@ -477,6 +477,60 @@ describe('Sized images audit', () => {
     });
   });
 
+  describe('has defined aspect-ratio', () => {
+    it('fails when an image only has explicit CSS aspect-ratio', async () => {
+      const result = await runAudit({
+        attributeWidth: '',
+        attributeHeight: '',
+        _privateCssSizing: {
+          width: null,
+          height: null,
+          aspectRatio: '1 / 1',
+        },
+      });
+      expect(result.score).toEqual(0);
+    });
+
+    it('fails when an image only has non-explicit CSS aspect-ratio', async () => {
+      const result = await runAudit({
+        attributeWidth: '100',
+        attributeHeight: '',
+        _privateCssSizing: {
+          width: null,
+          height: null,
+          aspectRatio: 'auto',
+        },
+      });
+      expect(result.score).toEqual(0);
+    });
+
+    it('passes when CSS aspect-ratio and attribute width are explicit', async () => {
+      const result = await runAudit({
+        attributeWidth: '100',
+        attributeHeight: '',
+        _privateCssSizing: {
+          width: null,
+          height: null,
+          aspectRatio: '1 / 1',
+        },
+      });
+      expect(result.score).toEqual(1);
+    });
+
+    it('passes when CSS aspect-ratio and width are explicit', async () => {
+      const result = await runAudit({
+        attributeWidth: '',
+        attributeHeight: '',
+        _privateCssSizing: {
+          width: '100',
+          height: null,
+          aspectRatio: '1 / 1',
+        },
+      });
+      expect(result.score).toEqual(1);
+    });
+  });
+
   it('is not applicable when there are no images', async () => {
     const result = await UnsizedImagesAudit.audit({
       ImageElements: [],

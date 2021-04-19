@@ -86,13 +86,17 @@ class UnsizedImages extends Audit {
     const attrHeight = image.attributeHeight;
     const cssWidth = image._privateCssSizing.width;
     const cssHeight = image._privateCssSizing.height;
+    const cssAspectRatio = image._privateCssSizing.aspectRatio;
     const htmlWidthIsExplicit = UnsizedImages.doesHtmlAttrProvideExplicitSize(attrWidth);
     const cssWidthIsExplicit = UnsizedImages.doesCssPropProvideExplicitSize(cssWidth);
     const htmlHeightIsExplicit = UnsizedImages.doesHtmlAttrProvideExplicitSize(attrHeight);
     const cssHeightIsExplicit = UnsizedImages.doesCssPropProvideExplicitSize(cssHeight);
+    const explicitAspectRatio = UnsizedImages.doesCssPropProvideExplicitSize(cssAspectRatio);
     const explicitWidth = htmlWidthIsExplicit || cssWidthIsExplicit;
     const explicitHeight = htmlHeightIsExplicit || cssHeightIsExplicit;
-    return explicitWidth && explicitHeight;
+    return explicitWidth && explicitHeight ||
+      explicitWidth && explicitAspectRatio ||
+      explicitHeight && explicitAspectRatio;
   }
 
   /**

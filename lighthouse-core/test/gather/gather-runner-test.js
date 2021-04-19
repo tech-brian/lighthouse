@@ -129,6 +129,16 @@ function resetDefaultMockResponses() {
     .mockResponse('ServiceWorker.enable');
 }
 
+/**
+ * Restore the emulation to its original implementation for testing emulation-sensitive logic.
+ */
+function restoreActualEmulation() {
+  const actualEmulation = jest.requireActual('../../lib/emulation.js');
+  const emulation = require('../../lib/emulation.js');
+  emulation.emulate = actualEmulation.emulate;
+  emulation.throttle = actualEmulation.throttle;
+}
+
 beforeEach(() => {
   // @ts-expect-error - connectionStub has a mocked version of sendCommand implemented in each test
   connectionStub = new Connection();
@@ -138,6 +148,11 @@ beforeEach(() => {
   };
   driver = new EmulationDriver(connectionStub);
   resetDefaultMockResponses();
+
+  const emulation = require('../../lib/emulation.js');
+  emulation.emulate = jest.fn();
+  emulation.throttle = jest.fn();
+  emulation.clearThrottling = jest.fn();
 });
 
 describe('GatherRunner', function() {
@@ -275,6 +290,7 @@ describe('GatherRunner', function() {
   });
 
   it('sets up the driver to begin emulation when all flags are undefined', async () => {
+    restoreActualEmulation();
     await GatherRunner.setupDriver(driver, {settings: getSettings('mobile')});
 
     connectionStub.sendCommand.findInvocation('Emulation.setDeviceMetricsOverride');
@@ -286,6 +302,7 @@ describe('GatherRunner', function() {
   });
 
   it('applies the correct emulation given a particular formFactor', async () => {
+    restoreActualEmulation();
     await GatherRunner.setupDriver(driver, {settings: getSettings('mobile')});
     expect(connectionStub.sendCommand.findInvocation('Emulation.setDeviceMetricsOverride'))
       .toMatchObject({mobile: true});
@@ -297,6 +314,7 @@ describe('GatherRunner', function() {
   });
 
   it('sets throttling according to settings', async () => {
+    restoreActualEmulation();
     await GatherRunner.setupDriver(driver, {
       settings: {
         formFactor: 'mobile',
@@ -334,8 +352,6 @@ describe('GatherRunner', function() {
     };
     const driver = {
       assertNoSameOriginServiceWorkerClients: asyncFunc,
-      beginEmulation: asyncFunc,
-      setThrottling: asyncFunc,
       dismissJavaScriptDialogs: asyncFunc,
       enableRuntimeEvents: asyncFunc,
       enableAsyncStacks: asyncFunc,
@@ -371,7 +387,6 @@ describe('GatherRunner', function() {
       beginTrace: asyncFunc,
       gotoURL: async () => ({}),
       cleanBrowserCaches: createCheck('calledCleanBrowserCaches'),
-      setThrottling: asyncFunc,
       blockUrlPatterns: asyncFunc,
       setExtraHTTPHeaders: asyncFunc,
       endTrace: asyncFunc,
@@ -525,8 +540,6 @@ describe('GatherRunner', function() {
     };
     const driver = {
       assertNoSameOriginServiceWorkerClients: asyncFunc,
-      beginEmulation: asyncFunc,
-      setThrottling: asyncFunc,
       dismissJavaScriptDialogs: asyncFunc,
       enableRuntimeEvents: asyncFunc,
       enableAsyncStacks: asyncFunc,
